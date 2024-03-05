@@ -1,0 +1,57 @@
+name: feature create
+
+on:
+  repository_dispatch:
+    types:
+      - feature-create
+
+permissions: write-all
+
+jobs:
+  run:
+    name: Run check
+    runs-on: ubuntu-latest
+
+    # 구성 내용
+    #
+    # Github Actions 워크플로우의 repository_dispath 정리 링크
+    # payload 에 대한 설명 https://docs.github.com/ko/actions/using-workflows/events-that-trigger-workflows#repository_dispatch
+    #
+    # {
+    #   "event_type": {{ $workflows_name }}
+    #   "client_payload": {
+    #     "jira_number": {{ $jira_number }}
+    #     "func_name": {{ $func_name }}
+    #    }
+    # }
+    #
+    # 위와 같이 이벤트 입력
+    
+    steps:       
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up base branch
+        run: |
+          echo "BASED_BRANCH=feature/AMZUIOS-${{ github.event.client_payload.jira_number }}/base" >> $GITHUB_ENV
+          echo "FEATURE_BRANCH=feature/AMZUIOS-${{ github.event.client_payload.jira_number }}/${{ github.event.client_payload.func_name }}" >> $GITHUB_ENV
+      
+      - name: Check exist based branch
+        run: |
+          git fetch origin ${{ env.BASED_BRANCH }} || true
+          if [ -z "$(git show-ref refs/remotes/origin/${{ env.BASED_BRANCH }})" ]; then
+            echo "${{ env.BASED_BRANCH }} does not exist"
+            git checkout -b ${{ env.BASED_BRANCH }}
+            git push origin ${{ env.BASED_BRANCH }}
+          fi
+          
+      - name: Checkout branch
+        run: |
+          if [ -n "$(git show-ref refs/remotes/origin/${{ env.BASED_BRANCH }})" ]; then
+            git checkout -b ${{ env.FEATURE_BRANCH }} origin/${{ env.BASED_BRANCH }}
+          fi
+
+      - name: Push branch
+        uses: ad-m/github-push-action@master
+        with:
+          branch: ${{ env.FEATURE_BRANCH }}
