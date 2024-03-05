@@ -33,8 +33,8 @@ jobs:
 
       - name: Set up base branch
         run: |
-          echo "BASED_BRANCH=feature/AMZUIOS-${{ github.event.client_payload.jira_number }}/base" >> $GITHUB_ENV
-          echo "FEATURE_BRANCH=feature/AMZUIOS-${{ github.event.client_payload.jira_number }}/${{ github.event.client_payload.func_name }}" >> $GITHUB_ENV
+          echo "BASED_BRANCH=feature/issue-${{ github.event.client_payload.jira_number }}/base" >> $GITHUB_ENV
+          echo "FEATURE_BRANCH=feature/issue-${{ github.event.client_payload.jira_number }}/${{ github.event.client_payload.func_name }}" >> $GITHUB_ENV
       
       - name: Check exist based branch
         run: |
