@@ -63,12 +63,9 @@ def new_version(version):
 
 # 명령행 인수에서 값을 받음
 if len(sys.argv) > 1:
-    # value = sys.argv[1]
-    value = new_version("2.24.010")
-    print("Received value:", value)
+    value = sys.argv[1]
+    version = new_version(value)
+    print(version)
 else:
-    value = new_version("2.24.100")
-    print("No value received:", value)
-
-# 출력
-print("Hello from Python!")
+    version = current_version()
+    print(version)
