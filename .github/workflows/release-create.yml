@@ -16,12 +16,11 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Run Python script with input value
-      id: python
       run: |
         output=$(python ./.github/workflows/version.py "2.24.100")
         
         # 실행 결과 값을 출력하여 GitHub Actions에 전달
-        echo "result=$output" >> $GITHUB_ENV
+        echo "NEW_VERSION=$output" >> $GITHUB_ENV
 
     - name: Get the result
-      run: echo "Result is ${{ steps.python.outputs.result }}"  # 실행 결과 값을 출력하여 확인
+      run: echo "Result is ${{ env.NEW_VERSION }}"  # 실행 결과 값을 출력하여 확인
