@@ -1,0 +1,25 @@
+name: swift checker
+
+on:
+  repository_dispatch:
+    types:
+      - swift-checker
+
+permissions: write-all
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Compile and run Swift script with input value
+      id: swift
+      run: |
+        output=$(swiftc example.swift && ./.github/workflow/example "input_value")
+        echo "::set-output name=result::$output"
+
+    - name: Get the result
+      run: echo "Result is ${{ steps.swift.outputs.result }}"
