@@ -1,9 +1,8 @@
-name: feature create
+name: issue open branch make
 
 on:
-  repository_dispatch:
-    types:
-      - feature-create
+  issues:
+    types: [opened]
 
 permissions: write-all
 

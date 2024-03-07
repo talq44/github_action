@@ -1,0 +1,60 @@
+name: pr open info updates
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+
+permissions: write-all
+
+env:
+  BASE_BRANCH_NAME: ${{ github.event.pull_request.base.ref }}
+  RELATED_TITLE: "### Related PR"
+
+jobs:
+  pr-body-related-pr-update:
+    if: startsWith(github.event.pull_request.base.ref, 'feature/') || startsWith(github.event.pull_request.base.ref, 'deploy/') || startsWith(github.event.pull_request.base.ref, 'release/') || startsWith(github.event.pull_request.base.ref, 'issue')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check for RELATED_TITLE
+        id: checkTitle
+        run: |
+          if [[ "${{ github.event.pull_request.body }}" == *"$RELATED_TITLE"* ]]; then
+            echo "Related PR information found in the PR body."
+            echo "isContains=true" >> $GITHUB_OUTPUT
+          else
+            echo "No related PR information found in the PR body."
+            echo "isContains=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get PRs to Base Branch
+        id: prs
+        run: |
+          base_branch=$(jq -r .pull_request.base.ref "$GITHUB_EVENT_PATH")
+          prs=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls?state=all&base=${{ github.event.pull_request.base.ref }}" | jq -r '.[].html_url')
+          echo "pull request htmls $prs"
+          
+          # pr_list=$(echo "$prs" | grep -v "${{ github.event.pull_request.html_url }}" | awk '{print "- " $0}' | paste -sd "," -)
+          # echo "::set-output name=pr_list::$pr_list"
+
+      - name: Get current PR body
+        id: current_body
+        run: |
+          body=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" | jq -r '.body')
+          echo "::set-output name=body::$body"
+
+      - name: Update PR Body
+        run: |
+          title="### Related PR"
+          body=$(echo -e "${{ steps.current_body.outputs.body }}\n\n$title\n${{ steps.prs.outputs.pr_list }}")
+          curl -X PATCH -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/json" -d "{\"body\":\"$body\"}" "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}"
+
+  pr-body-no-update:
+    if: startsWith(github.event.pull_request.base.ref, 'master')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Do nothing
+        run: echo "This job does nothing"
