@@ -74,7 +74,7 @@ github_token = ""
 
 # 명령행 인수에서 값을 받음
 if len(sys.argv) > 1:
-    # 첫 번째 요소(sys.argv[0])는 스크립트의 경로입니다. 따라서 실제 값은 두 번째 요소부터 시작합니다.
+    
     pr_number = sys.argv[1]
     github_token = sys.argv[2]
     print("값이 성공적으로 들어왔습니다.")
