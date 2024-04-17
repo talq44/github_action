@@ -1,0 +1,16 @@
+name: B Workflow
+
+on:
+  repository_dispatch:
+    types: [trigger-b-workflow]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Call check
+        run: | 
+          echo "여기가 불렸습니다."
